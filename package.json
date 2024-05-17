@@ -15,7 +15,17 @@
     "commands": [{
       "command": "try.folderScanner",
       "title": "TRY"
-    }]
+    }],
+    "configuration":{
+      "title": "Try",
+      "properties": {
+        "try.ignore": {
+          "type": "array",
+          "description": "ignore",
+          "default": ["node_modules",".git",".vscode",".idea",".vscode-test",".vscode-test-electron"]
+        }
+      }
+    }
   },
   "scripts": {
     "lint": "eslint .",
