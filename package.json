@@ -22,7 +22,7 @@
         "try.ignore": {
           "type": "array",
           "description": "ignore",
-          "default": ["node_modules",".git",".vscode",".idea",".vscode-test",".vscode-test-electron"]
+          "default": ["node_modules",".git",".vscode",".idea",".vscode-test",".vscode-test-electron",".next"]
         }
       }
     }

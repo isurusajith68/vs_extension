@@ -96,7 +96,9 @@ function activate(context) {
 
       //read ALL files and create object
 
-      let files = [
+      console.log(jsxFiles);
+
+      let selected = [
         {
           filename: "",
           filepath: "",
@@ -108,10 +110,18 @@ function activate(context) {
         },
       ];
 
-      console.log(files);
+      console.log(selected);
 
-      for (let i = 0; i < jsxFiles.fileName.length; i++) {
-        const file = fs.readFileSync(jsxFiles.filePath[i], "utf8");
+      //select file
+      const selectedFile = vscode.window.showQuickPick(jsxFiles.fileName);
+
+      if (!selectedFile) {
+        return;
+      }
+
+      selectedFile.then((selectedFile) => {
+        const fileIndex = jsxFiles.fileName.indexOf(selectedFile);
+        const file = fs.readFileSync(jsxFiles.filePath[fileIndex], "utf8");
         const lines = file.split("\n");
 
         let imports = [];
@@ -119,14 +129,14 @@ function activate(context) {
         let props = [];
         let searchParams = [];
         let state = [];
-
+        //
         for (let line of lines) {
           if (line.includes("import")) {
             if (line.includes("from")) {
               const path = line.split("from")[1].replace(/['";]/g, "").trim();
               imports.push(path);
             }
-          } else if (line.includes("export")) { 
+          } else if (line.includes("export")) {
             if (line.includes("default")) {
               const defaultExport = line
                 .split("default")[1]
@@ -148,19 +158,45 @@ function activate(context) {
                 exports.push(namedExport);
               }
             }
+          } else if (line.includes("dispatch")) {
+            const regex = /dispatch\((\w+)\(/;
+            const match = line.match(regex);
+            if (match && match.length > 1) {
+              const action = match[1];
+              state.push(action);
+            }
+          } else if (line.includes("searchParams.get")) {
+            const regex = /searchParams\.get\(["'](\w+)["']\)/;
+            const match = line.match(regex);
+            if (match && match.length > 1) {
+              const param = match[1];
+              searchParams.push(param);
+            }
+          } else if (line.includes("const")) {
+            const regex = /const\s+\w+\s*=\s*\(\{\s*([^}]+)\s*\}\)/;
+            const match = line.match(regex);
+            if (match && match.length > 1) {
+              const paramsString = match[1];
+              const paramsArray = paramsString
+                .split(",")
+                .map((param) => param.trim());
+              paramsArray.forEach((param) => {
+                props.push(param);
+              });
+            }
           }
         }
 
-        files.push({
-          filename: jsxFiles.fileName[i],
-          filepath: jsxFiles.filePath[i],
+        selected.push({
+          filename: jsxFiles.fileName[fileIndex],
+          filepath: jsxFiles.filePath[fileIndex],
           imports,
           exports,
           props,
           searchParams,
           state,
         });
-      }
+      });
     }
   );
 
@@ -173,3 +209,55 @@ module.exports = {
   activate,
   deactivate,
 };
+
+// for (let i = 0; i < jsxFiles.fileName.length; i++) {
+//   const file = fs.readFileSync(jsxFiles.filePath[i], "utf8");
+//   const lines = file.split("\n");
+
+//   let imports = [];
+//   let exports = [];
+//   let props = [];
+//   let searchParams = [];
+//   let state = [];
+
+//   for (let line of lines) {
+//     if (line.includes("import")) {
+//       if (line.includes("from")) {
+//         const path = line.split("from")[1].replace(/['";]/g, "").trim();
+//         imports.push(path);
+//       }
+//     } else if (line.includes("export")) {
+//       if (line.includes("default")) {
+//         const defaultExport = line
+//           .split("default")[1]
+//           .replace(/['";]/g, "")
+//           .trim();
+//         exports.push(defaultExport);
+//       } else if (line.includes("export const")) {
+//         const regex = /export\s+const\s+(\w+)\s*=/;
+//         const match = line.match(regex);
+//         if (match && match.length > 1) {
+//           const namedExport = match[1];
+//           exports.push(namedExport);
+//         }
+//       } else if (line.includes("export function")) {
+//         const regex = /export\s+function\s+(\w+)\s*\(.*\)/;
+//         const match = line.match(regex);
+//         if (match && match.length > 1) {
+//           const namedExport = match[1];
+//           exports.push(namedExport);
+//         }
+//       }
+//     }
+//   }
+
+//   files.push({
+//     filename: jsxFiles.fileName[i],
+//     filepath: jsxFiles.filePath[i],
+//     imports,
+//     exports,
+//     props,
+//     searchParams,
+//     state,
+//   });
+// }
