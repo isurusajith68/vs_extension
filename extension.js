@@ -107,6 +107,14 @@ function activate(context) {
           props: [],
           searchParams: [],
           state: [],
+          reducer: {
+            mapSelectorReducer: [],
+            areaMapReducer: [],
+            propertiesMapReducer: [],
+            companyMapReducer: [],
+            landingMapReducer: [],
+            mapViewScaleReducer: [],
+          },
         },
       ];
 
@@ -129,6 +137,14 @@ function activate(context) {
         let props = [];
         let searchParams = [];
         let state = [];
+        let reducer = {
+          mapSelectorReducer: [],
+          areaMapReducer: [],
+          propertiesMapReducer: [],
+          companyMapReducer: [],
+          landingMapReducer: [],
+          mapViewScaleReducer: [],
+        };
         //
         for (let line of lines) {
           if (line.includes("import")) {
@@ -184,6 +200,23 @@ function activate(context) {
                 props.push(param);
               });
             }
+          } else if (line.includes("state")) {
+            const regex =
+              /state\.(landingMapReducer|mapViewScaleReducer|mapSelectorReducer|areaMapReducer|propertiesMapReducer|companyMapReducer)\.(\w+)/;
+            const match = line.match(regex);
+            if (match && match[1] === "mapSelectorReducer") {
+              reducer.mapSelectorReducer.push(match[2]);
+            } else if (match && match[1] === "areaMapReducer") {
+              reducer.areaMapReducer.push(match[2]);
+            } else if (match && match[1] === "propertiesMapReducer") {
+              reducer.propertiesMapReducer.push(match[2]);
+            } else if (match && match[1] === "companyMapReducer") {
+              reducer.companyMapReducer.push(match[2]);
+            } else if (match && match[1] === "landingMapReducer") {
+              reducer.landingMapReducer.push(match[2]);
+            } else if (match && match[1] === "mapViewScaleReducer") {
+              reducer.mapViewScaleReducer.push(match[2]);
+            }
           }
         }
 
@@ -195,6 +228,7 @@ function activate(context) {
           props,
           searchParams,
           state,
+          reducer,
         });
       });
     }
